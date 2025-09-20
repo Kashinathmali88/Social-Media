@@ -44,7 +44,7 @@ const syncUserCreation = inngest.createFunction(
 // User Deletion
 const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
-  { event: "clerk/user.deleted" }, // ⚠️ Clerk uses `user.deleted` (not `user.delete`)
+  { event: "clerk/user.deleted" },
   async ({ event }) => {
     try {
       const { id } = event.data;
@@ -59,7 +59,7 @@ const syncUserDeletion = inngest.createFunction(
 // User Update
 const syncUserUpdation = inngest.createFunction(
   { id: "update-user-from-clerk" },
-  { event: "clerk/user.updated" }, // ⚠️ Clerk uses `user.updated` (not `user.update`)
+  { event: "clerk/user.updated" },
   async ({ event }) => {
     try {
       const { id, first_name, last_name, email_addresses, image_url } =
