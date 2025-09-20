@@ -11,8 +11,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
-
+connectDB();
 app.listen(port, () => {
   console.log(`App is runnign on port ${port}`);
 });
-connectDB();
