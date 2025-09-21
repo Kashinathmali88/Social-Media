@@ -1,8 +1,8 @@
 import express from "express";
 import "dotenv/config";
-import connectDB from "./config/db.js";
-import { inngest, functions } from "./inngest/index.js";
+import connectDB from "./src/config/db.js";
 import { serve } from "inngest/express";
+import { inngest, functions } from "./src/inngest/index.js";
 
 const port = process.env.PORT || 4000;
 
