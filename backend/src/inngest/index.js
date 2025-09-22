@@ -1,8 +1,7 @@
 import { Inngest } from "inngest";
 import User from "../models/user.model.js";
-import "dotenv/config";
-import connectDB from "../config/db.js";
 
+// Create a client to send and receive events
 export const inngest = new Inngest({
   id: "pingUp-app",
   eventKey: process.env.INNGEST_EVENT_KEY,
@@ -10,73 +9,58 @@ export const inngest = new Inngest({
   mode: "cloud",
 });
 
-// User Creation
+// Inngest function to save user data to database
 const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
-  async ({ event, step }) => {
-    return step.run("create-user", async () => {
-      await connectDB();
+  async ({ event }) => {
+    const { id, first_name, last_name, email_addresses, image_url } =
+      event.data;
+    let username = email_addresses[0].email_addresses.splite("@")[0];
+    // check avaliblity of username
+    const user = await User.findOne({ username });
+    if (user) {
+      username = username + Math.floor(Math.random()) * 10000;
+    }
 
-      const { id, first_name, last_name, email_addresses, image_url } =
-        event.data;
-
-      let username = email_addresses[0].email_address.split("@")[0];
-
-      // check availability of username
-      const existingUser = await User.findOne({ username });
-      if (existingUser) {
-        username = username + Math.floor(Math.random() * 10000);
-      }
-
-      const userData = {
-        _id: id,
-        email: email_addresses[0].email_address,
-        full_name: `${first_name} ${last_name}`,
-        profile_picture: image_url,
-        username,
-      };
-
-      return User.create(userData);
-    });
+    const userData = {
+      _id: id,
+      email: email_addresses[0].email_addresses,
+      full_naem: first_name + " " + last_name,
+      profile_picture: image_url,
+      username: username,
+    };
+    await User.create(userData);
   }
 );
 
-// User Deletion
+// Inngest function to update user data to database
 const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
-  { event: "clerk/user.deleted" },
-  async ({ event, step }) => {
-    return step.run("delete-user", async () => {
-      await connectDB();
+  { event: "clerk/user.delete" },
+  async ({ event }) => {
+    const { id } = event.data;
 
-      const { id } = event.data;
-      return User.findByIdAndDelete(id);
-    });
+    await User.findByIdAndDelete(id);
   }
 );
 
-// User Update
+// Inngest function to save user data to database
 const syncUserUpdation = inngest.createFunction(
   { id: "update-user-from-clerk" },
-  { event: "clerk/user.updated" },
-  async ({ event, step }) => {
-    return step.run("update-user", async () => {
-      await connectDB();
+  { event: "clerk/user.update" },
+  async ({ event }) => {
+    const { id, first_name, last_name, email_addresses, image_url } =
+      event.data;
 
-      const { id, first_name, last_name, email_addresses, image_url } =
-        event.data;
-
-      const updatedUserData = {
-        email: email_addresses[0].email_address,
-        full_name: `${first_name} ${last_name}`,
-        profile_picture: image_url,
-      };
-
-      return User.findByIdAndUpdate(id, updatedUserData);
-    });
+    const updatedUserData = {
+      email: email_addresses[0].email_addresses,
+      full_name: first_name + " " + last_name,
+      profile_picture: image_url,
+    };
+    await User.findByIdAndUpdate(id, updatedUserData);
   }
 );
 
-// Export functions
+// Create an empty array where we'll export future Inngest functions
 export const functions = [syncUserCreation, syncUserUpdation, syncUserDeletion];

@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
   res.send("Api is running successfully");
 });
 
-// connectDB();
+connectDB();
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
