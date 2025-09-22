@@ -12,9 +12,10 @@ app.get("/", (req, res) => {
   res.send("Api is running successfully");
 });
 
+connectDB();
+
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-connectDB();
 app.listen(port, () => {
   console.log(`App is runnign on port ${port}`);
 });
