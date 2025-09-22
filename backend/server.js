@@ -10,11 +10,11 @@ const app = express();
 
 app.use(express.json());
 
+connectDB();
+
 app.get("/", (req, res) => {
   res.send("Api is running successfully");
 });
-
-connectDB();
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
