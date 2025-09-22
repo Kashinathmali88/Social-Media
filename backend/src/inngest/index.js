@@ -2,7 +2,7 @@ import { Inngest } from "inngest";
 import User from "../models/user.model.js";
 import "dotenv/config";
 import connectDB from "../config/db.js";
-// Create a client to send and receive events
+
 export const inngest = new Inngest({
   id: "pingUp-app",
   eventKey: process.env.INNGEST_EVENT_KEY,
@@ -14,9 +14,10 @@ export const inngest = new Inngest({
 const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
-  async ({ event }) => {
-    try {
+  async ({ event, step }) => {
+    return step.run("create-user", async () => {
       await connectDB();
+
       const { id, first_name, last_name, email_addresses, image_url } =
         event.data;
 
@@ -36,11 +37,8 @@ const syncUserCreation = inngest.createFunction(
         username,
       };
 
-      await User.create(userData);
-    } catch (err) {
-      console.error("Error in syncUserCreation:", err);
-      throw err; // ensures Inngest logs it
-    }
+      return User.create(userData);
+    });
   }
 );
 
@@ -48,15 +46,13 @@ const syncUserCreation = inngest.createFunction(
 const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
   { event: "clerk/user.deleted" },
-  async ({ event }) => {
-    try {
+  async ({ event, step }) => {
+    return step.run("delete-user", async () => {
       await connectDB();
+
       const { id } = event.data;
-      await User.findByIdAndDelete(id);
-    } catch (err) {
-      console.error("Error in syncUserDeletion:", err);
-      throw err;
-    }
+      return User.findByIdAndDelete(id);
+    });
   }
 );
 
@@ -64,9 +60,10 @@ const syncUserDeletion = inngest.createFunction(
 const syncUserUpdation = inngest.createFunction(
   { id: "update-user-from-clerk" },
   { event: "clerk/user.updated" },
-  async ({ event }) => {
-    try {
+  async ({ event, step }) => {
+    return step.run("update-user", async () => {
       await connectDB();
+
       const { id, first_name, last_name, email_addresses, image_url } =
         event.data;
 
@@ -76,11 +73,8 @@ const syncUserUpdation = inngest.createFunction(
         profile_picture: image_url,
       };
 
-      await User.findByIdAndUpdate(id, updatedUserData);
-    } catch (err) {
-      console.error("Error in syncUserUpdation:", err);
-      throw err;
-    }
+      return User.findByIdAndUpdate(id, updatedUserData);
+    });
   }
 );
 
