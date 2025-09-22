@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
   mongoose
-    .connect(process.env.MONGO_URI)
+    .connect(`${process.env.MONGO_URI}/Social-media`)
     .then(() => {
       console.log("DB connected");
     })
