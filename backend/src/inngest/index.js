@@ -16,16 +16,16 @@ const syncUserCreation = inngest.createFunction(
   async ({ event }) => {
     const { id, first_name, last_name, email_addresses, image_url } =
       event.data;
-    let username = email_addresses[0].email_addresses.split("@")[0];
+    let username = email_addresses[0].email_address.split("@")[0];
     // check avaliblity of username
     const user = await User.findOne({ username });
     if (user) {
-      username = username + Math.floor(Math.random()) * 10000;
+      username = username + Math.floor(Math.random() * 10000);
     }
 
     const userData = {
       _id: id,
-      email: email_addresses[0].email_addresses,
+      email: email_addresses[0].email_address,
       full_name: first_name + " " + last_name,
       profile_picture: image_url,
       username: username,
@@ -54,7 +54,7 @@ const syncUserUpdation = inngest.createFunction(
       event.data;
 
     const updatedUserData = {
-      email: email_addresses[0].email_addresses,
+      email: email_addresses[0].email_address,
       full_name: first_name + " " + last_name,
       profile_picture: image_url,
     };
